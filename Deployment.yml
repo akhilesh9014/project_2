@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: ReplicaSet
+metadata:
+    labels:
+      run: nginx
+    name: nginx-deploy 
+spec:
+  replicas: 2
+  selector:
+    metchLabels
+      run: nginx
+  template:
+    metadata:
+      labels:
+        run: nginx
+    spec:                        #--> specification
+       containers:
+       - image:   akhilesh9014/jenkinsbuild
+         name: akhilesh9014/jenkinsbuild
