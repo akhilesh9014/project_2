@@ -1,48 +1,25 @@
-pipeline {
-    agent {
-        node {
-            label 'slave2'
-        }
+node{
+    stage("git clone"){
+       git 'https://github.com/akhilesh9014/project_2.git'
     }
-    tools {
-        maven 'maven3'
+    stage("mave build"){
+        
+      def mavenHOME = tool name: "Maven3.6.3", type: "maven"
+      def mavenCMD = "${mavenHOME}/bin/mvn "
+      sh "${mavenCMD} clean package"
     }
-    stages {
-        stage('checkout') {
-            steps{
-                git 'https://github.com/akhilesh9014/Maven-Java-Project.git'
-            }
-        }
-        stage('build') {
-            steps {
-                sh 'mvn clean package'
-            }
-            post {
-                always {
-                    archiveArtifacts '**/*.war'
-                }
-            }
-            
-        }
-        stage('upload artifacts') {
-            steps {
-                sh 'mvn clean deploy'
-            }
-        }
-        stage('deploy') {
-            steps {
-                deploy adapters: [tomcat8(path: '', url: 'http://192.168.33.13:8555')], contextPath: 'visitagain', war: '**/*.war'
-            }
-        } 
-        stage('integration-test') {
-            sh 'mvn clean verify'
-        }
-        stage('production') {
-            steps {
-                 timeout(time: 10, unit: 'SECONDS') {
-			    input message: 'Do you want to continue?', submitter: 'Administrator'
-
-            }
-        }   
+    stage("build image"){
+        sh "docker build -t akhilesh9014/jenkinsbuild:v1 ."
     }
-}
+    stage("push image in dockerhub"){
+        withCredentials([string(credentialsId: 'DOCKER_CRED', variable: 'DOCKER_CRED')]) {
+            sh "docker login -u akhilesh9014 -p ${DOCKER_CRED}"
+        }
+          sh "docker push akhilesh9014/jenkinsbuild"
+    }
+    stage("deploy app in kubernetes cluster"){
+        kubernetesDeploy(
+            configs: "Deployment.yml", kubeconfigId: "KUBERNETES_CONFIG", enableConfigSubstitution: true       
+        )
+    }
+} 
