@@ -2,7 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
     labels:
-      run: deploy
+      run: deploy-myimage
     name: nginx-deploy 
 spec:
   replicas: 2
