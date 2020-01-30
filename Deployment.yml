@@ -1,21 +1,22 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-    labels:
-      run: deploy-myimage
-    name: nginx-deploy 
+    name: nginx-deploy
+    labels: 
+      app: deploy-myimage
 spec:
   replicas: 2
   selector:
     metchLabels
-      run:  deploy-myimage
+      app:  deploy-myimage
   template:
     metadata:
       labels:
-        run: deploy-myimage
+        app: deploy-myimage
     spec:                        #--> specification
        containers:
-       - image: akhilesh9014/jenkinsbuild
-         name:  akhilesh9014/jenkinsbuild
-
+       - name: mybuild_image
+         image: akhilesh9014/jenkinsbuild
+       ports:
+       - containerPort: 80
          
